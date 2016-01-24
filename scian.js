@@ -44,9 +44,13 @@ const cli = getopt(`
 `);
 
 cli.flags.uri = cli.input[0];
+
 if(cli.flags.footTime === 0) {
     cli.flags.footTime = 100500; // metro foot time not sense
 }
+
+var pagesNum = cli.flags.pagesNum || 10;
+
 // cl('cli', cli.flags);
 
 //
@@ -54,33 +58,37 @@ if(cli.flags.footTime === 0) {
 
 var goUri = isInBro()
     ? uri => {location.href = uri}
-    : uri => http(uri, { headers: { Cookie: 'serp_view_mode=table' } }).then(data => {
-        var html = data.body;
-        cl('html loaded', html.length)//, html.match(/objects_item_price/g))
-        // cl('html', html)
-        $ = $$.load(html, { normalizeWhitespace: true });
-        cl('parser inited: ', typeof $);
-        return $;
-    });
+    : uri => new Promise((res, rej) => setTimeout(() => {
+
+        http(uri, { headers: { Cookie: 'serp_view_mode=table' } }).then(data => {
+            var html = data.body;
+            cl('html loaded', html.length)//, html.match(/objects_item_price/g))
+            // cl('html', html)
+            $ = $$.load(html, { normalizeWhitespace: true });
+            cl('parser inited: ', typeof $);
+            res($);
+        });
+
+    }, _.random(pagesNum, pagesNum * 100)));
 
 var grabPrices = $ => {
 
-    var collection = _($('body').find('.objects_item_price'))
-    .toArray()
-    .map(el=>{
-        var price = _.get(el, 'children.0.data');
-        return _.isString(price) && price.trim() ? price : _.get(el, 'children.1.children.0.data')
-    });
+        var collection = _($('body').find('.objects_item_price'))
+        .toArray()
+        .map(el=>{
+            var price = _.get(el, 'children.0.data');
+            return _.isString(price) && price.trim() ? price : _.get(el, 'children.1.children.0.data')
+        });
 
-    // cl('collection', collection.value());
+        // cl('collection', collection.value());
 
-    // grab prices
-    var prices = collection
-    .map(txt => txt.trim().replace(/\s/,''))
-    .map(txt => parseInt(txt, 10) / 1000)
-    .value();
+        // grab prices
+        var prices = collection
+        .map(txt => txt.trim().replace(/\s/,''))
+        .map(txt => parseInt(txt, 10) / 1000)
+        .value();
 
-    return prices;
+        return prices;
 
 };
 
@@ -129,7 +137,6 @@ cl('go URIs');
 // go to cian search result
 // Снять на длительный срок однокомнатную квартиру с фото
 // в центре с мебелью, холодильником и стиралкой
-var pagesNum = cli.flags.pagesNum || 10;
 
 Promise.all(
     _(pagesNum).range()
