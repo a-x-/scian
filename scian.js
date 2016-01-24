@@ -39,7 +39,7 @@ const cli = getopt(`
       -p, --price-min       [30k] Min cian search price (for uri query)
       -f, --foot-time       [15]  Metro foot time
       -n, --pages-num       [10]  Number of pages to scan
-      -m, --median                Output only median number
+      -o, --output          [all|median] Output format
 
     Examples
       $ ./scian
@@ -103,7 +103,7 @@ var calcStats = prices => {
     // цены аренды в мес в тысячах руб.
     // [35, 40, 40, ..., 38, 38, 38, 38, 38, 38, 39]
 
-    if(!cli.flags.median) {
+    if(cli.flags.output !== 'median') {
         // 90th percentile — максимум без выбросов
         cl('true max', jStat.percentile(prices, .9).toFixed(2)) // 81
 
@@ -116,7 +116,7 @@ var calcStats = prices => {
 
     // median — медиана (правильное среднее)
     var median = jStat.median(prices).toFixed(2);
-    cli.flags.median ? cl(median) : cl('**median**', median) // 38
+    cli.flags.output === 'median' ? cl(median) : cl('**median**', median) // 38
 
 };
 
