@@ -3,13 +3,16 @@
 // init
 
 var cl = console.log.bind(console);
+var deb = console.error.bind(console, 'info: ');
+var err = console.error.bind(console);
+
 var isInBro = () => typeof window !== 'undefined';
 
 var loadJs = isInBro()
     ? src => {
         var script = document.createElement('script');
         script.src = src;
-        script.onload=()=>cl('loaded', src);
+        script.onload=()=>deb('loaded', src);
         document.head.appendChild(script);
     }
     : src => require(src.match(/([^\/]+).min.js$/)[1]);
@@ -36,6 +39,7 @@ const cli = getopt(`
       -p, --price-min       [30k] Min cian search price (for uri query)
       -f, --foot-time       [15]  Metro foot time
       -n, --pages-num       [10]  Number of pages to scan
+      -m, --median                Output only median number
 
     Examples
       $ ./scian
@@ -51,7 +55,7 @@ if(cli.flags.footTime === 0) {
 
 var pagesNum = cli.flags.pagesNum || 10;
 
-// cl('cli', cli.flags);
+// deb('cli', cli.flags);
 
 //
 // buisness logic
@@ -62,10 +66,10 @@ var goUri = isInBro()
 
         http(uri, { headers: { Cookie: 'serp_view_mode=table' } }).then(data => {
             var html = data.body;
-            cl('html loaded', html.length)//, html.match(/objects_item_price/g))
-            // cl('html', html)
+            deb('html loaded', html.length)//, html.match(/objects_item_price/g))
+            // deb('html', html)
             $ = $$.load(html, { normalizeWhitespace: true });
-            cl('parser inited: ', typeof $);
+            deb('parser inited: ', typeof $);
             res($);
         });
 
@@ -80,7 +84,7 @@ var grabPrices = $ => {
             return _.isString(price) && price.trim() ? price : _.get(el, 'children.1.children.0.data')
         });
 
-        // cl('collection', collection.value());
+        // deb('collection', collection.value());
 
         // grab prices
         var prices = collection
@@ -94,22 +98,25 @@ var grabPrices = $ => {
 
 var calcStats = prices => {
 
-    cl('prices', prices.join(','))
+    deb('prices', prices.join(','))
 
     // цены аренды в мес в тысячах руб.
     // [35, 40, 40, ..., 38, 38, 38, 38, 38, 38, 39]
 
-    // 90th percentile — максимум без выбросов
-    cl('true max', jStat.percentile(prices, .9).toFixed(2)) // 81
+    if(!cli.flags.median) {
+        // 90th percentile — максимум без выбросов
+        cl('true max', jStat.percentile(prices, .9).toFixed(2)) // 81
 
-    // 10th percentile — минимум без выбросов
-    cl('true min', jStat.percentile(prices, .1).toFixed(2)) // 35
+        // 10th percentile — минимум без выбросов
+        cl('true min', jStat.percentile(prices, .1).toFixed(2)) // 35
 
-    // Среднее (тупое среднее)
-    cl('mean', jStat.mean(prices).toFixed(2)) // 49
+        // Среднее (тупое среднее)
+        cl('mean', jStat.mean(prices).toFixed(2)) // 49
+    }
 
-    // mediane — медиана (правильное среднее)
-    cl('**median**', jStat.median(prices).toFixed(2)) // 38
+    // median — медиана (правильное среднее)
+    var median = jStat.median(prices).toFixed(2);
+    cli.flags.median ? cl(median) : cl('**median**', median) // 38
 
 };
 
@@ -132,7 +139,7 @@ var getUri = pageNum_ => {
 //
 // run!
 
-cl('go URIs');
+deb('go URIs');
 
 // go to cian search result
 // Снять на длительный срок однокомнатную квартиру с фото
@@ -142,9 +149,9 @@ Promise.all(
     _(pagesNum).range()
     .map(
         i => goUri(getUri(i + 1)).then(
-        $ => grabPrices($), e=>cl('err', e)))
+        $ => grabPrices($), e=>err('err', e)))
     .value()
 )
 .then(pricesGroups => _.flatten(pricesGroups)) // groups of results by pages
 .then(prices => calcStats(prices))
-.catch(e=>cl('groups err', e))
+.catch(e=>err('groups err', e))
