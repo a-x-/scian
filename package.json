@@ -2,7 +2,7 @@
   "name": "cian.stat.js",
   "version": "1.0.0",
   "description": "simple cian stat",
-  "main": "magicli.js",
+  "main": "scian.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -12,7 +12,7 @@
     "rent"
   ],
   "author": "invntrm",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "cheerio": "^0.19.0",
     "d3": "^3.5.13",
