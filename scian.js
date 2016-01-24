@@ -86,8 +86,8 @@ var calcStats = prices => {
     // 90th percentile — максимум без выбросов
     cl('true max', jStat.percentile(prices, .9).toFixed(2)) // 81
 
-    // 30th percentile — минимум без выбросов
-    cl('true min', jStat.percentile(prices, .3).toFixed(2)) // 35
+    // 10th percentile — минимум без выбросов
+    cl('true min', jStat.percentile(prices, .1).toFixed(2)) // 35
 
     // Среднее (тупое среднее)
     cl('mean', jStat.mean(prices).toFixed(2)) // 49
