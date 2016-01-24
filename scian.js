@@ -38,11 +38,15 @@ const cli = getopt(`
       -n, --pages-num       [10]  Number of pages to scan
 
     Examples
-      $ scian
-      $ scian -n10 -p10 -f5
+      $ ./scian
+      $ ./scian -n10 -p10 -f5
+      $ scian -f0 'http://www.cian.ru/cat.php?deal_type=sale&district[0]=121&offer_type=flat&only_foot=2&room1=1'
 `);
 
 cli.flags.uri = cli.input[0];
+if(cli.flags.footTime === 0) {
+    cli.flags.footTime = 100500; // metro foot time not sense
+}
 // cl('cli', cli.flags);
 
 //
@@ -53,7 +57,8 @@ var goUri = isInBro()
     : uri => http(uri, { headers: { Cookie: 'serp_view_mode=table' } }).then(data => {
         var html = data.body;
         cl('html loaded', html.length)//, html.match(/objects_item_price/g))
-        $ = $$.load(html);
+        // cl('html', html)
+        $ = $$.load(html, { normalizeWhitespace: true });
         cl('parser inited: ', typeof $);
         return $;
     });
@@ -62,7 +67,10 @@ var grabPrices = $ => {
 
     var collection = _($('body').find('.objects_item_price'))
     .toArray()
-    .map(el=>el.children[0].data);
+    .map(el=>{
+        var price = _.get(el, 'children.0.data');
+        return _.isString(price) && price.trim() ? price : _.get(el, 'children.1.children.0.data')
+    });
 
     // cl('collection', collection.value());
 
