@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 //
 // init
 
@@ -38,10 +39,11 @@ const cli = getopt(`
 
     Examples
       $ scian
+      $ scian -n10 -p10 -f5
 `);
 
 cli.flags.uri = cli.input[0];
-// cl('uri', cli.flags.uri);
+// cl('cli', cli.flags);
 
 //
 // buisness logic
