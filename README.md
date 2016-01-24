@@ -19,15 +19,16 @@ Simple cian.ru (ЦИАН) stat
 ### Example output
 html loaded 704573
 parser inited:  function
+
 html loaded 713850
 parser inited:  function
 
 prices 35,35,40,...,45,45,47,50,49.5,50,50,50,50
 
-true max 90.00
-true min 48.70
-mean 63.46
-**median** 55.00
+* true max 90.00
+* true min 48.70
+* mean 63.46
+* **median** 55.00
 
 ### simple in browser script for one page
 https://gist.github.com/a-x-/5878942b1c77ac1d6fff
