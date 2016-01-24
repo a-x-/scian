@@ -1,5 +1,5 @@
 # scian
-Simple cian stat
+Simple cian.ru (ЦИАН) stat
 
 ```
     Usage
@@ -28,3 +28,7 @@ true max 90.00
 true min 48.70
 mean 63.46
 **median** 55.00
+
+### simple in browser script for one page
+https://gist.github.com/a-x-/5878942b1c77ac1d6fff
+
